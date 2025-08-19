@@ -1,0 +1,23 @@
+#!/bin/rc
+force=0
+if(~ $1 -f) force=1
+
+echo 'Running sysupdate...'
+sysupdate >/tmp/sysupdate.log >[2=1]
+
+if(test $force -eq 0 && grep -s 'up to date' /tmp/sysupdate.log) {
+    echo 'System already up to date, skipping rebuild'
+    rm /tmp/sysupdate.log
+    exit
+}
+
+if(test $force -eq 1) {
+    echo 'Force flag specified, rebuilding anyway...'
+}
+if not {
+    echo 'Updates found, rebuilding system...'
+}
+
+rm /tmp/sysupdate.log
+cd /sys/src
+mk clean ; mk ; mk install ; mk clean ; cd 9/pc64 ; mk clean ; mk ; mk install ; mk clean
